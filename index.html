@@ -202,36 +202,55 @@ After generation, review copied automatic and Google Review page will open autom
 
 <script>
 const webhookURL="https://hook.us2.make.com/0gkgw9kdw46a3csmg5dqn9jqug03y1go";
-const googleURL="https://search.google.com/local/writereview?placeid=ChIJQWh0uNEbw2MRWT7vlIaLRQ";
+const googleURL="https://search.google.com/local/writereview?placeid=ChIJQWh0uNEbw2MRWT7vlIaLRLQ";
 
 document.getElementById("reviewForm").addEventListener("submit",async e=>{
   e.preventDefault();
+
   const status=document.getElementById("status");
   status.innerText="Generating your review…";
 
-  const services=[...document.querySelectorAll("input[name=services]:checked")].map(i=>i.value);
-  if(!services.length){alert("Select at least one service");status.innerText="";return;}
+  const services=[...document.querySelectorAll("input[name=services]:checked")]
+    .map(i=>i.value);
+
+  if(!services.length){
+    alert("Please select at least one service");
+    status.innerText="";
+    return;
+  }
+
+  const location=document.getElementById("location").value;
 
   try{
     const r=await fetch(webhookURL,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({services,location:location.value})
+      body:JSON.stringify({services,location})
     });
 
-    const text=await r.text();
-    if(text.length<10)throw"Empty";
+    const reviewText=await r.text();
+    if(reviewText.length<10) throw "Empty response";
 
-    review.value=text;
-    await navigator.clipboard.writeText(text);
-    status.innerText="Review copied. Opening Google…";
+    // Show review on page
+    document.getElementById("review").value=reviewText;
 
-    setTimeout(()=>window.open(googleURL,"_blank"),900);
-  }catch{
+    // ✅ Auto copy
+    await navigator.clipboard.writeText(reviewText);
+
+    status.innerText="Review copied. Opening Google review page…";
+
+    // ✅ Auto open GMB
+    setTimeout(()=>{
+      window.open(googleURL,"_blank");
+    },700);
+
+  }catch(err){
     status.innerText="Something went wrong. Please try again.";
+    console.error(err);
   }
 });
 </script>
+
 
 </body>
 </html>
