@@ -3,73 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Leave a Review</title>
+<title>Leave a Google Review</title>
 
 <style>
 
 body{
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
-background:linear-gradient(135deg,#f1f5ff,#eef2ff);
+font-family:Arial, sans-serif;
+background:linear-gradient(135deg,#eef2ff,#f8fafc);
 padding:20px;
 }
 
 .container{
-max-width:560px;
+max-width:600px;
 margin:auto;
-background:rgba(255,255,255,0.85);
-backdrop-filter:blur(20px);
-padding:28px;
-border-radius:20px;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
 
 h1{
 text-align:center;
-font-weight:600;
 font-size:22px;
-margin-bottom:4px;
+margin-bottom:5px;
 }
 
 .subtitle{
 text-align:center;
-color:#6b7280;
+color:#666;
 font-size:14px;
 margin-bottom:20px;
 }
 
 .services{
-border:1px solid #e5e7eb;
+border:1px solid #eee;
+padding:15px;
 border-radius:12px;
-padding:14px;
-max-height:220px;
+max-height:230px;
 overflow:auto;
 }
 
 .services label{
 display:block;
-margin-bottom:8px;
-font-size:14px;
+margin-bottom:6px;
 }
 
 input[type=text]{
 width:100%;
 padding:12px;
 border-radius:10px;
-border:1px solid #e5e7eb;
-margin-top:12px;
+border:1px solid #ddd;
+margin-top:10px;
 }
 
 button{
 width:100%;
 padding:14px;
 border:none;
-border-radius:14px;
+border-radius:12px;
 background:#2563eb;
 color:white;
-font-weight:600;
 font-size:16px;
-margin-top:16px;
+font-weight:600;
+margin-top:15px;
 cursor:pointer;
 }
 
@@ -77,20 +73,44 @@ button:hover{
 background:#1d4ed8;
 }
 
-.status{
-text-align:center;
-margin-top:16px;
-font-weight:600;
-}
-
 textarea{
 width:100%;
 height:140px;
-margin-top:14px;
-border-radius:12px;
-border:1px solid #e5e7eb;
+margin-top:15px;
 padding:12px;
+border-radius:12px;
+border:1px solid #eee;
 background:#f9fafb;
+}
+
+.status{
+text-align:center;
+margin-top:15px;
+font-weight:600;
+color:#16a34a;
+}
+
+.popup{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:#111827;
+color:white;
+padding:14px 18px;
+border-radius:12px;
+font-size:14px;
+display:none;
+z-index:1000;
+}
+
+#confetti{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
 }
 
 </style>
@@ -98,15 +118,14 @@ background:#f9fafb;
 
 <body>
 
+<canvas id="confetti"></canvas>
+
 <div class="container">
 
 <h1>Share Your Experience</h1>
 <div class="subtitle">Your review will be generated automatically</div>
 
 <form id="reviewForm">
-  <div class="section">
-    <label>Select services</label>
-    <div class="note">You can select multiple services</div>
 
 <div class="services">
 
@@ -115,7 +134,6 @@ background:#f9fafb;
 <label><input type="checkbox" name="services" value="SEO"> SEO</label>
 <label><input type="checkbox" name="services" value="Social Media Marketing"> Social Media Marketing</label>
 <label><input type="checkbox" name="services" value="Website Development"> Website Development</label>
-<label><input type="checkbox" name="services" value="Facebook & Instagram Ads"> Facebook & Instagram Ads</label>
 <label><input type="checkbox" name="services" value="Lead Generation"> Lead Generation</label>
 
 </div>
@@ -132,23 +150,38 @@ background:#f9fafb;
 
 </div>
 
+<div id="popup" class="popup">
+📱 Tap & Hold → Paste your review on Google
+</div>
+
 <script>
 
 const webhookURL="https://hook.us2.make.com/0gkgw9kdw46a3csmg5dqn9jqug03y1go";
-
 const googleURL="https://search.google.com/local/writereview?placeid=ChIJQWh0uNEbw2MRWT7vlIaLRLQ";
+
+const reviewForm=document.getElementById("reviewForm");
+const status=document.getElementById("status");
+const reviewBox=document.getElementById("review");
+const popup=document.getElementById("popup");
+const generateBtn=document.getElementById("generateBtn");
+const locationInput=document.getElementById("location");
+
+
+// -------- RATE LIMITER + LOCAL LOCK --------
 
 const used = localStorage.getItem("reviewGenerated");
 
 if (used) {
-document.getElementById("reviewForm").style.display="none";
-document.getElementById("status").innerText="Review already generated on this device.";
+reviewForm.style.display="none";
+status.innerText="Review already generated on this device.";
 }
 
-document.getElementById("reviewForm").addEventListener("submit",async e=>{
-e.preventDefault();
 
-const status=document.getElementById("status");
+// -------- FORM SUBMIT --------
+
+reviewForm.addEventListener("submit",async e=>{
+
+e.preventDefault();
 
 status.innerText="Generating your review...";
 
@@ -166,28 +199,58 @@ const r=await fetch(webhookURL,{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
-services,
-location:location.value
+services:services,
+location:locationInput.value.trim()
 })
 });
 
 let text=await r.text();
 
+console.log("Webhook response:",text);
+
+if(!text){
+throw new Error("Empty response");
+}
+
 text=text.trim();
 
-if(!text) throw "Empty";
+if(text.length<5){
+throw new Error("Invalid review");
+}
 
-review.value=text;
+reviewBox.value=text;
+
+
+// -------- COPY --------
 
 await navigator.clipboard.writeText(text);
 
-status.innerText="✅ Review copied successfully! Opening Google review...";
+status.innerText="✅ Review copied successfully!";
+
+
+// -------- LOCAL LOCK --------
 
 localStorage.setItem("reviewGenerated","yes");
 
-document.getElementById("generateBtn").style.display="none";
+generateBtn.disabled=true;
+reviewForm.style.display="none";
 
-document.getElementById("reviewForm").style.display="none";
+
+// -------- CONFETTI --------
+
+try{
+showConfetti();
+}catch(e){
+console.log("confetti error",e);
+}
+
+
+// -------- POPUP --------
+
+popup.style.display="block";
+
+
+// -------- OPEN GOOGLE --------
 
 setTimeout(()=>{
 window.open(googleURL,"_blank");
@@ -195,11 +258,63 @@ window.open(googleURL,"_blank");
 
 }catch(err){
 
+console.error("Review generation error:",err);
+
 status.innerText="Something went wrong. Please try again.";
 
 }
 
 });
+
+
+
+// -------- CONFETTI --------
+
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let confetti=[];
+
+function showConfetti(){
+
+confetti=[];
+
+for(let i=0;i<120;i++){
+
+confetti.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height-200,
+r:Math.random()*6+4,
+color:`hsl(${Math.random()*360},70%,60%)`
+});
+
+}
+
+animateConfetti();
+
+}
+
+function animateConfetti(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+confetti.forEach(c=>{
+
+ctx.beginPath();
+ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+ctx.fillStyle=c.color;
+ctx.fill();
+
+c.y+=3;
+
+});
+
+requestAnimationFrame(animateConfetti);
+
+}
 
 </script>
 
