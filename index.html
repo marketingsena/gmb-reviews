@@ -136,7 +136,6 @@ textarea{
   font-size:12px;
   color:var(--muted);
 }
-
 </style>
 </head>
 
@@ -149,12 +148,13 @@ textarea{
 
 <form id="reviewForm">
 
-<div class="section">
-<label>Select services</label>
-<div class="note">You can select multiple services</div>
+  <div class="section">
+    <label>Select services</label>
+    <div class="note">You can select multiple services</div>
 
-<div class="services">
-<label><input type="checkbox" name="services" value="Facebook & Instagram Ads"> Facebook & Instagram Ads</label>
+    <div class="services">
+      
+    <label><input type="checkbox" name="services" value="Facebook & Instagram Ads"> Facebook & Instagram Ads</label>
     <label><input type="checkbox" name="services" value="Lead Generation"> Lead Generation</label>
     <label><input type="checkbox" name="services" value="Social Media Marketing & Management"> Social Media Marketing & Management</label>
     <label><input type="checkbox" name="services" value="Digital Marketing"> Digital Marketing</label>
@@ -178,15 +178,15 @@ textarea{
     <label><input type="checkbox" name="services" value="Mobile App Development"> Mobile App Development</label>
     <label><input type="checkbox" name="services" value="CRM Development"> CRM Development</label>
     <label><input type="checkbox" name="services" value="Landing Page Development"> Landing Page Development</label>
-</div>
-</div>
+    </div>
+  </div>
 
-<div class="section">
-<label>Your City / Area</label>
-<input type="text" id="location" placeholder="e.g. Surat, Vesu">
-</div>
+  <div class="section">
+    <label>Your City / Area</label>
+    <input type="text" id="location" placeholder="e.g. Surat, Vesu">
+  </div>
 
-<button id="generateBtn" type="submit">Generate My Review</button>
+  <button type="submit">Generate My Review</button>
 
 </form>
 
@@ -201,124 +201,36 @@ After generation, review copied automatic and Google Review page will open autom
 </div>
 
 <script>
-
 const webhookURL="https://hook.us2.make.com/0gkgw9kdw46a3csmg5dqn9jqug03y1go";
-const googleURL="https://search.google.com/local/writereview?placeid=ChIJQWh0uNEbw2MRWT7vlIaLRLQ";
+const googleURL="https://search.google.com/local/writereview?placeid=ChIJQWh0uNEbw2MRWT7vlIaLRQ";
 
-const reviewForm=document.getElementById("reviewForm");
-const status=document.getElementById("status");
-const reviewBox=document.getElementById("review");
-const generateBtn=document.getElementById("generateBtn");
-const locationInput=document.getElementById("location");
+document.getElementById("reviewForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const status=document.getElementById("status");
+  status.innerText="Generating your review…";
 
+  const services=[...document.querySelectorAll("input[name=services]:checked")].map(i=>i.value);
+  if(!services.length){alert("Select at least one service");status.innerText="";return;}
 
-/* 🧪 TEST MODE
-TOKEN + LOCK SYSTEM DISABLED
-UNCOMMENT IN LIVE VERSION
-*/
+  try{
+    const r=await fetch(webhookURL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({services,location:location.value})
+    });
 
-/*
-function generateToken(){
-return "t_"+Math.random().toString(36).substring(2)+Date.now();
-}
+    const text=await r.text();
+    if(text.length<10)throw"Empty";
 
-let urlParams=new URLSearchParams(window.location.search);
-let token=urlParams.get("token");
+    review.value=text;
+    await navigator.clipboard.writeText(text);
+    status.innerText="Review copied. Opening Google…";
 
-if(!token){
-token=generateToken();
-window.history.replaceState(null,null,"?token="+token);
-}
-
-const usedToken=localStorage.getItem("token_"+token);
-
-if(usedToken){
-reviewForm.style.display="none";
-status.innerText="This review link has already been used.";
-}
-*/
-
-
-/* DEVICE LOCK DISABLED FOR TEST */
-
-/*
-const used = localStorage.getItem("reviewGenerated");
-
-if (used) {
-reviewForm.style.display="none";
-status.innerText="Review already generated on this device.";
-}
-*/
-
-
-reviewForm.addEventListener("submit",async e=>{
-e.preventDefault();
-
-status.style.color="#16a34a";
-status.innerText="Generating your review…";
-
-const services=[...document.querySelectorAll("input[name=services]:checked")]
-.map(i=>i.value);
-
-if(!services.length){
-alert("Please select at least one service");
-status.innerText="";
-return;
-}
-
-try{
-
-const location=locationInput.value.trim();
-
-const r=await fetch(webhookURL,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({services,location})
+    setTimeout(()=>window.open(googleURL,"_blank"),900);
+  }catch{
+    status.innerText="Something went wrong. Please try again.";
+  }
 });
-
-let reviewText=await r.text();
-
-console.log("Webhook response:",reviewText);
-
-if(!reviewText){
-throw new Error("Empty response");
-}
-
-reviewText=reviewText.trim();
-
-if(reviewText.length<5){
-throw new Error("Invalid review response");
-}
-
-reviewBox.value=reviewText;
-
-await navigator.clipboard.writeText(reviewText);
-
-status.innerText="Review copied. Opening Google review page…";
-
-/* LOCK DISABLED IN TEST */
-
-/*
-localStorage.setItem("reviewGenerated","yes");
-localStorage.setItem("token_"+token,"used");
-*/
-
-generateBtn.disabled=true;
-
-setTimeout(()=>{
-window.open(googleURL,"_blank");
-},1000);
-
-}catch(err){
-
-console.error("Review generation error:",err);
-status.style.color="red";
-status.innerText="Something went wrong. Please try again.";
-
-}
-
-});
-
 </script>
 
 </body>
