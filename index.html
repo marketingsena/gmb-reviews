@@ -2,107 +2,142 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Write a Google Review</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leave a Google Review</title>
 
 <style>
+:root{
+  --primary:#2563eb;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e5e7eb;
+}
+
+*{box-sizing:border-box}
 
 body{
-font-family:Arial, sans-serif;
-background:linear-gradient(135deg,#eef2ff,#f8fafc);
-padding:20px;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+  background: linear-gradient(135deg,#f8fafc,#eef2ff);
+  margin:0;
+  padding:20px;
+  color:var(--text);
 }
 
 .container{
-max-width:600px;
-margin:auto;
-background:white;
-padding:25px;
-border-radius:18px;
-box-shadow:0 10px 25px rgba(0,0,0,.08);
+  max-width:620px;
+  margin:auto;
+  background:var(--card);
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
 }
 
 h1{
-text-align:center;
-font-size:22px;
-margin-bottom:5px;
+  font-size:22px;
+  text-align:center;
+  margin:0 0 6px;
 }
 
-.subtitle{
-text-align:center;
-color:#666;
-font-size:14px;
-margin-bottom:20px;
+.sub{
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+.section{
+  margin-bottom:22px;
+}
+
+.section label{
+  font-weight:600;
+  font-size:14px;
+}
+
+.note{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
 }
 
 .services{
-border:1px solid #eee;
-padding:15px;
-border-radius:12px;
-max-height:230px;
-overflow:auto;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+  max-height:260px;
+  overflow:auto;
+  margin-top:10px;
 }
 
 .services label{
-display:block;
-margin-bottom:6px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 0;
+  font-size:14px;
+  cursor:pointer;
 }
 
-input[type=text]{
-width:100%;
-padding:12px;
-border-radius:10px;
-border:1px solid #ddd;
-margin-top:10px;
+.services input{
+  accent-color:var(--primary);
+}
+
+input[type="text"]{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  margin-top:10px;
+  font-size:14px;
+}
+
+input[type="text"]:focus{
+  outline:none;
+  border-color:var(--primary);
 }
 
 button{
-width:100%;
-padding:14px;
-border:none;
-border-radius:12px;
-background:#2563eb;
-color:white;
-font-size:16px;
-font-weight:600;
-margin-top:15px;
-cursor:pointer;
+  width:100%;
+  border:none;
+  border-radius:14px;
+  padding:14px;
+  font-size:16px;
+  font-weight:600;
+  background:var(--primary);
+  color:#fff;
+  cursor:pointer;
+  transition:.2s;
 }
 
-button:hover{
-background:#1d4ed8;
+button:hover{opacity:.9}
+
+.status{
+  text-align:center;
+  font-size:14px;
+  margin-top:12px;
 }
 
 textarea{
-width:100%;
-height:140px;
-margin-top:15px;
-padding:12px;
-border-radius:12px;
-border:1px solid #eee;
-background:#f9fafb;
+  width:100%;
+  height:150px;
+  margin-top:14px;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  font-size:14px;
+  background:#f9fafb;
 }
 
-.status{
-text-align:center;
-margin-top:15px;
-font-weight:600;
-color:#16a34a;
+.footer{
+  text-align:center;
+  margin-top:16px;
+  font-size:12px;
+  color:var(--muted);
 }
 
-.popup{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-background:#111827;
-color:white;
-padding:14px 18px;
-border-radius:12px;
-font-size:14px;
-display:none;
-z-index:1000;
-}
+/* 🔹 Confetti canvas (added) */
 
 #confetti{
 position:fixed;
@@ -111,6 +146,7 @@ left:0;
 width:100%;
 height:100%;
 pointer-events:none;
+z-index:9999;
 }
 
 </style>
@@ -118,27 +154,52 @@ pointer-events:none;
 
 <body>
 
+<!-- 🔹 Confetti canvas added -->
 <canvas id="confetti"></canvas>
 
 <div class="container">
 
 <h1>Share Your Experience</h1>
-<div class="subtitle">Your review will be generated automatically</div>
+<div class="sub">Your review will be generated automatically</div>
 
 <form id="reviewForm">
 
+<div class="section">
+<label>Select services</label>
+<div class="note">You can select multiple services</div>
+
 <div class="services">
-
-<label><input type="checkbox" name="services" value="GMB Management"> GMB Management</label>
-<label><input type="checkbox" name="services" value="Local SEO"> Local SEO</label>
-<label><input type="checkbox" name="services" value="SEO"> SEO</label>
-<label><input type="checkbox" name="services" value="Social Media Marketing"> Social Media Marketing</label>
-<label><input type="checkbox" name="services" value="Website Development"> Website Development</label>
-<label><input type="checkbox" name="services" value="Lead Generation"> Lead Generation</label>
-
+<label><input type="checkbox" name="services" value="Facebook & Instagram Ads"> Facebook & Instagram Ads</label>
+    <label><input type="checkbox" name="services" value="Lead Generation"> Lead Generation</label>
+    <label><input type="checkbox" name="services" value="Social Media Marketing & Management"> Social Media Marketing & Management</label>
+    <label><input type="checkbox" name="services" value="Digital Marketing"> Digital Marketing</label>
+    <label><input type="checkbox" name="services" value="Google My Business Profile Creation & Optimization"> Google My Business Profile Creation & Optimization</label>
+    <label><input type="checkbox" name="services" value="GMB Call Verification"> GMB Call Verification</label>
+    <label><input type="checkbox" name="services" value="GMB Suspension Removal"> GMB Suspension Removal</label>
+    <label><input type="checkbox" name="services" value="GMB Management"> GMB Management</label>
+    <label><input type="checkbox" name="services" value="Local SEO"> Local SEO</label>
+    <label><input type="checkbox" name="services" value="Video Editing"> Video Editing</label>
+    <label><input type="checkbox" name="services" value="Graphic Design"> Graphic Design</label>
+    <label><input type="checkbox" name="services" value="WhatsApp Marketing"> WhatsApp Marketing</label>
+    <label><input type="checkbox" name="services" value="NFC + QR Code Digital Visiting Card"> NFC + QR Code Digital Visiting Card</label>
+    <label><input type="checkbox" name="services" value="Content Marketing & Writing"> Content Marketing & Writing</label>
+    <label><input type="checkbox" name="services" value="SEO"> SEO</label>
+    <label><input type="checkbox" name="services" value="GMB Ads"> GMB Ads</label>
+    <label><input type="checkbox" name="services" value="Business Consulting"> Business Consulting</label>
+    <label><input type="checkbox" name="services" value="AI Automation"> AI Automation</label>
+    <label><input type="checkbox" name="services" value="Advertising & Branding"> Advertising & Branding</label>
+    <label><input type="checkbox" name="services" value="Website Development & Design"> Website Development & Design</label>
+    <label><input type="checkbox" name="services" value="Software Development"> Software Development</label>
+    <label><input type="checkbox" name="services" value="Mobile App Development"> Mobile App Development</label>
+    <label><input type="checkbox" name="services" value="CRM Development"> CRM Development</label>
+    <label><input type="checkbox" name="services" value="Landing Page Development"> Landing Page Development</label>
+</div>
 </div>
 
-<input type="text" id="location" placeholder="Your City / Area">
+<div class="section">
+<label>Your City / Area</label>
+<input type="text" id="location" placeholder="e.g. Surat, Vesu">
+</div>
 
 <button id="generateBtn" type="submit">Generate My Review</button>
 
@@ -146,12 +207,12 @@ pointer-events:none;
 
 <div id="status" class="status"></div>
 
-<textarea id="review" readonly placeholder="Your review will appear here"></textarea>
+<textarea id="review" readonly placeholder="Your generated review will appear here..."></textarea>
 
+<div class="footer">
+After generation, review copied automatic and Google Review page will open automatically. Paste Your Review!
 </div>
 
-<div id="popup" class="popup">
-📱 Tap & Hold → Paste your review on Google
 </div>
 
 <script>
@@ -162,12 +223,33 @@ const googleURL="https://search.google.com/local/writereview?placeid=ChIJQWh0uNE
 const reviewForm=document.getElementById("reviewForm");
 const status=document.getElementById("status");
 const reviewBox=document.getElementById("review");
-const popup=document.getElementById("popup");
 const generateBtn=document.getElementById("generateBtn");
 const locationInput=document.getElementById("location");
 
 
-// -------- RATE LIMITER + LOCAL LOCK --------
+/* 🔒 TOKEN SYSTEM (QR Scan = 1 Token) */
+
+function generateToken(){
+return "t_"+Math.random().toString(36).substring(2)+Date.now();
+}
+
+let urlParams=new URLSearchParams(window.location.search);
+let token=urlParams.get("token");
+
+if(!token){
+token=generateToken();
+window.history.replaceState(null,null,"?token="+token);
+}
+
+const usedToken=localStorage.getItem("token_"+token);
+
+if(usedToken){
+reviewForm.style.display="none";
+status.innerText="This review link has already been used.";
+}
+
+
+/* 🔒 Device rate limiter */
 
 const used = localStorage.getItem("reviewGenerated");
 
@@ -177,15 +259,15 @@ status.innerText="Review already generated on this device.";
 }
 
 
-// -------- FORM SUBMIT --------
+/* submit handler */
 
 reviewForm.addEventListener("submit",async e=>{
-
 e.preventDefault();
 
-status.innerText="Generating your review...";
+status.innerText="Generating your review…";
 
-const services=[...document.querySelectorAll("input[name=services]:checked")].map(i=>i.value);
+const services=[...document.querySelectorAll("input[name=services]:checked")]
+.map(i=>i.value);
 
 if(!services.length){
 alert("Please select at least one service");
@@ -195,71 +277,59 @@ return;
 
 try{
 
+const location=locationInput.value.trim();
+
 const r=await fetch(webhookURL,{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-services:services,
-location:locationInput.value.trim()
-})
+body:JSON.stringify({services,location,token})
 });
 
-let text=await r.text();
+let reviewText=await r.text();
 
-console.log("Webhook response:",text);
+console.log("Webhook response:",reviewText);
 
-if(!text){
+if(!reviewText){
 throw new Error("Empty response");
 }
 
-text=text.trim();
+reviewText=reviewText.trim();
 
-if(text.length<5){
-throw new Error("Invalid review");
+if(reviewText.length<5){
+throw new Error("Invalid review response");
 }
 
-reviewBox.value=text;
+reviewBox.value=reviewText;
 
 
-// -------- COPY --------
+/* auto copy */
 
-await navigator.clipboard.writeText(text);
+await navigator.clipboard.writeText(reviewText);
 
-status.innerText="✅ Review copied successfully!";
+status.innerText="Review copied. Opening Google review page…";
 
 
-// -------- LOCAL LOCK --------
+/* 🎉 Confetti */
+
+try{startConfetti();}catch(e){console.log("confetti error",e);}
+
+
+/* 🔒 lock token + device */
 
 localStorage.setItem("reviewGenerated","yes");
+localStorage.setItem("token_"+token,"used");
 
 generateBtn.disabled=true;
 reviewForm.style.display="none";
 
 
-// -------- CONFETTI --------
-
-try{
-showConfetti();
-}catch(e){
-console.log("confetti error",e);
-}
-
-
-// -------- POPUP --------
-
-popup.style.display="block";
-
-
-// -------- OPEN GOOGLE --------
-
 setTimeout(()=>{
 window.open(googleURL,"_blank");
-},1500);
+},1000);
 
 }catch(err){
 
 console.error("Review generation error:",err);
-
 status.innerText="Something went wrong. Please try again.";
 
 }
@@ -267,52 +337,44 @@ status.innerText="Something went wrong. Please try again.";
 });
 
 
+/* 🔹 Confetti Safe Engine */
 
-// -------- CONFETTI --------
+function startConfetti(){
 
 const canvas=document.getElementById("confetti");
+if(!canvas) return;
+
 const ctx=canvas.getContext("2d");
 
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 
-let confetti=[];
-
-function showConfetti(){
-
-confetti=[];
+let pieces=[];
 
 for(let i=0;i<120;i++){
-
-confetti.push({
+pieces.push({
 x:Math.random()*canvas.width,
 y:Math.random()*canvas.height-200,
 r:Math.random()*6+4,
 color:`hsl(${Math.random()*360},70%,60%)`
 });
-
 }
 
-animateConfetti();
-
-}
-
-function animateConfetti(){
-
+function animate(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-confetti.forEach(c=>{
-
+pieces.forEach(p=>{
 ctx.beginPath();
-ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-ctx.fillStyle=c.color;
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fillStyle=p.color;
 ctx.fill();
-
-c.y+=3;
-
+p.y+=3;
 });
 
-requestAnimationFrame(animateConfetti);
+requestAnimationFrame(animate);
+}
+
+animate();
 
 }
 
