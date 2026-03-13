@@ -250,6 +250,7 @@ status.innerText="Review already generated on this device.";
 reviewForm.addEventListener("submit",async e=>{
 e.preventDefault();
 
+status.style.color="#16a34a"; 
 status.innerText="Generating your review…";
 
 const services=[...document.querySelectorAll("input[name=services]:checked")]
@@ -294,12 +295,6 @@ await navigator.clipboard.writeText(reviewText);
 
 status.innerText="Review copied. Opening Google review page…";
 
-
-/* 🎉 Confetti */
-
-try{startConfetti();}catch(e){console.log("confetti error",e);}
-
-
 /* 🔒 lock token + device */
 
 localStorage.setItem("reviewGenerated","yes");
@@ -316,6 +311,7 @@ window.open(googleURL,"_blank");
 }catch(err){
 
 console.error("Review generation error:",err);
+status.style.color="red";
 status.innerText="Something went wrong. Please try again.";
 
 }
