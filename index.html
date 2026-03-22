@@ -181,6 +181,16 @@ textarea{
 </div>
 </div>
 
+<label><strong>Select Your Rating</strong></label>
+<select id="rating" required>
+  <option value="">Choose rating</option>
+  <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+  <option value="4">⭐⭐⭐⭐ Good</option>
+  <option value="3">⭐⭐⭐ Average</option>
+  <option value="2">⭐⭐ Poor</option>
+  <option value="1">⭐ Very Poor</option>
+</select>
+
 <div class="section">
 <label>Your City / Area</label>
 <input type="text" id="location" placeholder="e.g. Surat, Vesu">
@@ -264,6 +274,36 @@ if(!services.length){
 alert("Please select at least one service");
 status.innerText="";
 return;
+}
+
+// ⭐ RATING SYSTEM (ADD ONLY)
+
+const rating = document.getElementById("rating").value;
+
+// ⭐ NEGATIVE FLOW Review Complaint
+if(rating <= 3){
+
+// 1️⃣ Send to Google Sheet
+fetch("https://script.google.com/macros/s/AKfycby-YjpiMOhr_nAPT6-PZqKIOvAZJtowHywPAY-_Ul5vyKTTMN3NkrJM0IYGVS94OU7B/exec", {
+  method: "POST",
+  headers: {"Content-Type":"application/json"},
+  body: JSON.stringify({
+    rating: rating,
+    services: services,
+    location: locationInput.value.trim()
+  })
+});
+
+// 2️⃣ Open WhatsApp
+const phone = "919512991113"; // change this
+
+const message = encodeURIComponent(
+"Hi, I had some issue with your service. I want to share feedback."
+);
+
+window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+
+return; // ❌ STOP  (NO GMB, NO AI)
 }
 
 try{
