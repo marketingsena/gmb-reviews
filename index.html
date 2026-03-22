@@ -276,61 +276,19 @@ status.innerText="";
 return;
 }
 
-// ⭐ NEGATIVE FLOW (AI + SHEET SAVE)
+// ⭐ NEGATIVE FLOW (FINAL CLEAN VERSION)
 
 const rating = document.getElementById("rating").value;
 
 if(rating <= 3){
 
-try{
+status.style.color = "#16a34a";
+status.innerText = "🙏 Thank you for your feedback!";
 
-const location = locationInput.value.trim();
+generateBtn.disabled = true;
 
-// 🔹 AI REVIEW GENERATE (same webhook)
-const r = await fetch(webhookURL,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({services,location})
-});
-
-let reviewText = await r.text();
-
-if(!reviewText) throw "Empty";
-
-reviewText = reviewText.trim();
-
-// 🔹 HUMANIZE
-reviewText = humanizeReview(
-reviewText,
-"Marketing Sena",
-"Parsis",
-location,
-services
-);
-
-// 🔹 SHEET SAVE (IMPORTANT)
-fetch("https://script.google.com/macros/s/AKfycbwWJ5VQkjGYzzmhveWf54lUtyucx7zvritWhO4x6MUaID-qlV7J4Bt1dZ4uA9WPknjk/exec", {
-  method: "POST",
-  body: JSON.stringify({
-    rating: rating,
-    services: services,
-    location: location,
-    review: reviewText
-  })
-});
-
-// UI show (optional)
-reviewBox.value = reviewText;
-status.innerText = "Thanks for your feedback 🙏";
-
+// ❌ STOP EVERYTHING
 return;
-
-}catch(err){
-console.error(err);
-status.innerText="Error saving feedback";
-return;
-}
-
 }
 
 
