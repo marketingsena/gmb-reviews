@@ -204,7 +204,7 @@ textarea{
 
 <textarea id="review" readonly placeholder="Your generated review will appear here..."></textarea>
 
-<div class="footer">
+<div id="reviewFooter" class="footer">
 After generation, review copied automatic and Google Review page will open automatically. Paste Your Review!
 </div>
 
@@ -353,21 +353,27 @@ status.innerText="Something went wrong. Please try again.";
 
 });
 
-  // ⭐ Hide textarea for low rating
+  
+  // ⭐ Hide textarea + footer for low rating
 
 document.getElementById("rating").addEventListener("change", function(){
 
 const rating = this.value;
 const reviewBox = document.getElementById("review");
+const footer = document.getElementById("reviewFooter");
 
 if(rating <= 3 && rating !== ""){
 reviewBox.style.display = "none";
+footer.style.display = "none";
 } else {
 reviewBox.style.display = "block";
+footer.style.display = "block";
 }
 
 });
 
+// ⭐ Service Mapping Keywords
+  
   const serviceKeywords = {
 
 "Facebook & Instagram Ads":[
