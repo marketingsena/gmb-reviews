@@ -276,42 +276,61 @@ status.innerText="";
 return;
 }
 
-// ⭐ GET RATING (ONLY ONE TIME)
+// ⭐ NEGATIVE FLOW (AI + SHEET SAVE)
+
 const rating = document.getElementById("rating").value;
 
-// ⭐ NEGATIVE FLOW (FINAL FIXED)
 if(rating <= 3){
 
-const phone = "919512991113";
+try{
 
-// services + location
-const selectedServices = services.join(", ");
-const userLocation = locationInput.value.trim();
+const location = locationInput.value.trim();
 
-// WhatsApp message (FULL DATA)
-const message = encodeURIComponent(
-`Hi, I faced an issue.
+// 🔹 AI REVIEW GENERATE (same webhook)
+const r = await fetch(webhookURL,{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({services,location})
+});
 
-Services: ${selectedServices}
-Location: ${userLocation}
+let reviewText = await r.text();
 
-Please assist.`
+if(!reviewText) throw "Empty";
+
+reviewText = reviewText.trim();
+
+// 🔹 HUMANIZE
+reviewText = humanizeReview(
+reviewText,
+"Marketing Sena",
+"Parsis",
+location,
+services
 );
 
-// 1️⃣ Send to Google Sheet
+// 🔹 SHEET SAVE (IMPORTANT)
 fetch("https://script.google.com/macros/s/AKfycbwWJ5VQkjGYzzmhveWf54lUtyucx7zvritWhO4x6MUaID-qlV7J4Bt1dZ4uA9WPknjk/exec", {
   method: "POST",
   body: JSON.stringify({
     rating: rating,
     services: services,
-    location: locationInput.value.trim()
+    location: location,
+    review: reviewText
   })
 });
 
-// 2️⃣ Open WhatsApp WITH DATA
-window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+// UI show (optional)
+reviewBox.value = reviewText;
+status.innerText = "Thanks for your feedback 🙏";
 
-return; // STOP
+return;
+
+}catch(err){
+console.error(err);
+status.innerText="Error saving feedback";
+return;
+}
+
 }
 
 
