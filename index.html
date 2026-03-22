@@ -276,32 +276,27 @@ status.innerText="";
 return;
 }
 
-  // ⭐ NEGATIVE FLOW WITH AUTO MESSAGE
-
+// ⭐ GET RATING (ONLY ONE TIME)
 const rating = document.getElementById("rating").value;
 
+// ⭐ NEGATIVE FLOW (FINAL FIXED)
 if(rating <= 3){
 
-const phone = "919512991113"; // change
+const phone = "919512991113";
 
+// services + location
 const selectedServices = services.join(", ");
 const userLocation = locationInput.value.trim();
 
+// WhatsApp message (FULL DATA)
 const message = encodeURIComponent(
-`Hi, I faced an issue.\n\nServices: ${selectedServices}\nLocation: ${userLocation}\n\nPlease assist.`
+`Hi, I faced an issue.
+
+Services: ${selectedServices}
+Location: ${userLocation}
+
+Please assist.`
 );
-
-window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-
-return; // STOP
-}
-
-// ⭐ RATING SYSTEM (ADD ONLY)
-
-const rating = document.getElementById("rating").value;
-
-// ⭐ NEGATIVE FLOW Review Complaint
-if(rating <= 3){
 
 // 1️⃣ Send to Google Sheet
 fetch("https://script.google.com/macros/s/AKfycby-YjpiMOhr_nAPT6-PZqKIOvAZJtowHywPAY-_Ul5vyKTTMN3NkrJM0IYGVS94OU7B/exec", {
@@ -310,20 +305,14 @@ fetch("https://script.google.com/macros/s/AKfycby-YjpiMOhr_nAPT6-PZqKIOvAZJtowHy
   body: JSON.stringify({
     rating: rating,
     services: services,
-    location: locationInput.value.trim()
+    location: userLocation
   })
 });
 
-// 2️⃣ Open WhatsApp
-const phone = "919512991113"; // change this
-
-const message = encodeURIComponent(
-"Hi, I had some issue with your service. I want to share feedback."
-);
-
+// 2️⃣ Open WhatsApp WITH DATA
 window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
 
-return; // ❌ STOP  (NO GMB, NO AI)
+return; // STOP
 }
 
 
