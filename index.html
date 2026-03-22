@@ -306,6 +306,27 @@ window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
 return; // ❌ STOP  (NO GMB, NO AI)
 }
 
+
+  // ⭐ NEGATIVE FLOW WITH AUTO MESSAGE
+
+const rating = document.getElementById("rating").value;
+
+if(rating <= 3){
+
+const phone = "91XXXXXXXXXX"; // change
+
+const selectedServices = services.join(", ");
+const userLocation = locationInput.value.trim();
+
+const message = encodeURIComponent(
+`Hi, I faced an issue.\n\nServices: ${selectedServices}\nLocation: ${userLocation}\n\nPlease assist.`
+);
+
+window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+
+return; // STOP
+}
+
 try{
 
 const location=locationInput.value.trim();
@@ -363,6 +384,21 @@ console.error("Review generation error:",err);
 status.style.color="red";
 status.innerText="Something went wrong. Please try again.";
 
+}
+
+});
+
+  // ⭐ Hide textarea for low rating
+
+document.getElementById("rating").addEventListener("change", function(){
+
+const rating = this.value;
+const reviewBox = document.getElementById("review");
+
+if(rating <= 3 && rating !== ""){
+reviewBox.style.display = "none";
+} else {
+reviewBox.style.display = "block";
 }
 
 });
