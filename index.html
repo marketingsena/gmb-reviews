@@ -290,7 +290,15 @@ if(reviewText.length<5){
 throw new Error("Invalid review response");
 }
 
-reviewBox.value=reviewText;
+reviewText = humanizeReview(
+reviewText,
+"Marketing Sena",
+"Parsis",
+location,
+services
+);
+
+reviewBox.value = reviewText;
 
 await navigator.clipboard.writeText(reviewText);
 
@@ -318,6 +326,113 @@ status.innerText="Something went wrong. Please try again.";
 }
 
 });
+
+  const serviceKeywords = {
+"Local SEO":["local visibility","Google ranking","map ranking"],
+"GMB Management":["Google presence","Google listing","business visibility"],
+"Facebook & Instagram Ads":["lead generation","ad performance","paid ads results"],
+"SEO":["search ranking","organic traffic","website visibility"],
+"Website Development & Design":["website performance","user experience","fast loading"],
+"Digital Marketing":["online growth","brand visibility","digital presence"]
+};
+
+function humanizeReview(text, brand, owner, city, services){
+
+// remove city from AI text
+if(city){
+const parts = city.split(",");
+parts.forEach(p=>{
+let clean = p.trim();
+let reg = new RegExp(clean,"gi");
+text = text.replace(reg,"");
+});
+}
+
+text = text.replace(/\s+/g," ").trim();
+
+// select max 3 services
+let selected = services.slice(0,3);
+
+// service + keyword sentence
+let serviceLine = "";
+selected.forEach(s=>{
+let keywords = serviceKeywords[s] || [];
+let kw = keywords[Math.floor(Math.random()*keywords.length)] || "";
+
+if(kw){
+serviceLine += `${s} (${kw}), `;
+}else{
+serviceLine += `${s}, `;
+}
+});
+
+serviceLine = serviceLine.replace(/,\s*$/,"");
+
+// openings
+const openings = [
+"Honestly, ",
+"I recently worked with them and ",
+"My experience was quite good. ",
+"At first I was not sure, but "
+];
+
+// recommendations
+const recommendations = [
+"I highly recommend them.",
+"The team is helpful.",
+"The staff is helpful."
+];
+
+// trust line (ONLY place city used)
+let mainService = selected[0] || "digital marketing";
+
+const trustLine =
+`If you are looking for best ${mainService} service in ${city}, then ${brand} is a great choice.`;
+
+// owner lines
+const ownerLines = [
+`I also interacted with ${owner}, very helpful.`,
+`${owner} guided us properly.`,
+""
+];
+
+// clean AI patterns
+text = text.replace(/, and/g," and");
+text = text.replace(/very good/gi,"really good");
+text = text.replace(/excellent/gi,"great");
+
+// random opening
+if(Math.random()>0.4){
+text = openings[Math.floor(Math.random()*openings.length)] + text;
+}
+
+// add services naturally
+if(serviceLine){
+text += " They helped with " + serviceLine + ".";
+}
+
+// add recommendation
+if(Math.random()>0.5){
+text += " " + recommendations[Math.floor(Math.random()*recommendations.length)];
+}
+
+// add trust line (with city)
+if(Math.random()>0.5){
+text += " " + trustLine;
+}
+
+// owner mention
+if(Math.random()>0.7){
+text += " " + ownerLines[Math.floor(Math.random()*ownerLines.length)];
+}
+
+// slight imperfection
+if(Math.random()>0.7){
+text = text.replace(/\./g,"..");
+}
+
+return text;
+}
 
 </script>
 
