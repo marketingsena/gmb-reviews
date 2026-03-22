@@ -276,6 +276,26 @@ status.innerText="";
 return;
 }
 
+  // ⭐ NEGATIVE FLOW WITH AUTO MESSAGE
+
+const rating = document.getElementById("rating").value;
+
+if(rating <= 3){
+
+const phone = "919512991113"; // change
+
+const selectedServices = services.join(", ");
+const userLocation = locationInput.value.trim();
+
+const message = encodeURIComponent(
+`Hi, I faced an issue.\n\nServices: ${selectedServices}\nLocation: ${userLocation}\n\nPlease assist.`
+);
+
+window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+
+return; // STOP
+}
+
 // ⭐ RATING SYSTEM (ADD ONLY)
 
 const rating = document.getElementById("rating").value;
@@ -306,26 +326,6 @@ window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
 return; // ❌ STOP  (NO GMB, NO AI)
 }
 
-
-  // ⭐ NEGATIVE FLOW WITH AUTO MESSAGE
-
-const rating = document.getElementById("rating").value;
-
-if(rating <= 3){
-
-const phone = "919512991113"; // change
-
-const selectedServices = services.join(", ");
-const userLocation = locationInput.value.trim();
-
-const message = encodeURIComponent(
-`Hi, I faced an issue.\n\nServices: ${selectedServices}\nLocation: ${userLocation}\n\nPlease assist.`
-);
-
-window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-
-return; // STOP
-}
 
 try{
 
