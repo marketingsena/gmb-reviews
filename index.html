@@ -299,13 +299,12 @@ Please assist.`
 );
 
 // 1️⃣ Send to Google Sheet
-fetch("https://script.google.com/macros/s/AKfycby-YjpiMOhr_nAPT6-PZqKIOvAZJtowHywPAY-_Ul5vyKTTMN3NkrJM0IYGVS94OU7B/exec", {
+fetch("https://script.google.com/macros/s/AKfycbwWJ5VQkjGYzzmhveWf54lUtyucx7zvritWhO4x6MUaID-qlV7J4Bt1dZ4uA9WPknjk/exec", {
   method: "POST",
-  headers: {"Content-Type":"application/json"},
   body: JSON.stringify({
     rating: rating,
     services: services,
-    location: userLocation
+    location: locationInput.value.trim()
   })
 });
 
